@@ -1,23 +1,17 @@
-// ** This is a TDD - Test drivien dev:
 
-// __tests__/			// jest tests
-//   Employee.test.js
-//   Engineer.test.js
-//   Intern.test.js
-//   Manager.test.js
-// dist/               // rendered output (HTML) and CSS style sheet
-// lib/				// classes
-// src/				// template helper code
-// index.js			// runs the application
-
-const { Console } = require("console");
+const { Console } = require("console");       // I did not put this into my code. Not sure what did. Don't want to delete it just in case.
+const { allowedNodeEnvironmentFlags } = require("process");  // same as the console on line 2. Not sure where this came from.
 const fs = require("fs");
 const inquirer = require("inquirer");
-const { allowedNodeEnvironmentFlags } = require("process");
+const Employee = require("./lib/employee");
+const Engineer = require('./lib/engineer')
+const Intern = require('./lib/intern')
+const Manager = require('./lib/manager')
+
 
 initial()
 
-//    Function to generate an htmle file, as well as the folder to put it in.
+//    Function to generate an html file, as well as the folder to put it in.
 let fileName = ''
 function initial(){
     inquirer.prompt([
@@ -25,6 +19,13 @@ function initial(){
             type: 'input',
             name: 'name',
             message: 'What would you like your page to be called?',
+            validate: answer => {
+                if (answer !== '') {
+                    return true
+                } else {
+                    return "answer must not be blank"
+                }
+            }
           },  
       ])
       .then((response) => {
@@ -67,34 +68,119 @@ function initial(){
     )
 }
 
-// The object and its subclasses
-function Employee(name, id, email) {
-    this.name = name;
-    this.id = id;
-    this.email = email;
-}
-
-class intern extends Employee {
-    constructor(name, id, email, school, role) {
-        super(name, id, email);
-        this.school = school;
-        this.role = role;
-    }
-}
-class manager extends Employee {
-    constructor(name, id, email, office, role) {
-        super(name, id, email);
-        this.office = office;
-        this.role = role;
-    }
-}
-class engineer extends Employee {
-    constructor(name, id, email, github, role) {
-        super(name, id, email);
-        this.github = github;
-        this.role = role;
-    }
-}
+// Asks the user about the employee they are adding and composes it into HTML format
+function addEmployee() {
+    inquirer.prompt([
+        {
+          type: 'input',
+          name: 'name',
+          message: 'Adding employee, what is their name?',
+          validate: answer => {
+            if (answer !== '') {
+                return true
+              } else {
+                return "answer must not be blank"
+            }
+        }
+      },  
+        {
+          type: 'input',
+          name: 'id',
+          message: 'What is their ID?',
+          validate: answer => {
+            if (answer !== '') {
+              return true
+            } else {
+              return "answer must not be blank"
+            }
+          }
+        },  
+        {
+          type: 'input',
+          name: 'email',
+          message: 'What is their email?',
+        },  
+        {
+          type: 'list',
+          name: 'role',
+          message: 'What is their role?',
+          choices: ['manager', 'engineer', 'intern']
+        },  
+      ])
+      .then( (response) => {
+        if (response.role == 'manager'){
+          const underling = new Employee(response.name, response.id, response.email, response.role);
+          inquirer.prompt([
+            {
+              type: 'input',
+              name: 'office',
+              message: 'What is their office number?',
+            },  
+          ])
+          .then((response) => {
+            const x = new Manager(underling.name, underling.id, underling.email, underling.role, response.office);
+            const y = 
+            `<div class="card" style="width: 30%;">
+            <div class="card-body ${x.getRole()}">
+            <h5 class="card-title">${x.getName()}</h5>
+            <p class="card-text"> Company ID: ${x.getID()}</p>
+            <p class="card-text"> Email: <a href="mailto:${x.getEmail()}" target="_blank"><p class="bold">${x.getEmail()}</p> </a></p>
+            <p class="card-text"> Role: ${x.getRole()}</p>
+            <p class="card-text"> Office: ${x.getOffice()}</p>
+            </div>
+            </div>`;
+            addInfo(y)
+          })
+        }
+        else if (response.role == 'engineer'){
+            const underling = new Employee(response.name, response.id, response.email, response.role);
+            inquirer.prompt([
+                {
+                  type: 'input',
+                  name: 'github',
+                  message: 'What is their github name?',
+                },  
+              ])
+              .then((response) => {
+                const x = new Engineer(underling.name, underling.id, underling.email, underling.role, response.github);
+                const y = 
+                `<div class="card" style="width: 30%;">
+                <div class="card-body ${x.getRole()}">
+                <h5 class="card-title">${x.getName()}</h5>
+                <p class="card-text"> Company ID: ${x.getID()}</p>
+                <p class="card-text"> Email: <a href="mailto:${x.getEmail()}" target="_blank"><p class="bold">${x.getEmail()}</p> </a></p>
+                <p class="card-text"> Role: ${x.getRole()}</p>
+                  <p class="card-text">GitHub: <a href="https://github.com/${x.getGithub()}" target="_blank"><p class="bold">github.com/${x.getGithub()}</p> </a></p>
+                  </div>
+              </div>`;
+                addInfo(y);
+              })
+        }
+        else {
+            const underling = new Employee(response.name, response.id, response.email, response.role);
+            inquirer.prompt([
+                {
+                  type: 'input',
+                  name: 'school',
+                  message: 'What is their school?',
+                },  
+              ])
+              .then((response) => {
+                const x = new Intern(underling.name, underling.id, underling.email, underling.role, response.school);
+                const y = 
+                `<div class="card" style="width: 30%;">
+                <div class="card-body ${x.getRole()}">
+                <h5 class="card-title">${x.getName()}</h5>
+                <p class="card-text"> Company ID: ${x.getID()}</p>
+                <p class="card-text"> Email: <a href="mailto:${x.getEmail()}" target="_blank"><p class="bold">${x.getEmail()}</p> </a></p>
+                <p class="card-text"> Role: ${x.getRole()}</p>
+                  <p class="card-text"> School: ${x.getSchool()}</p>
+                </div>
+              </div>`;
+                addInfo(y);
+              })
+        }
+})}
 
 
 // Prompts the user to add another user or append the last bits of the HTML file and call it a day.
@@ -114,119 +200,11 @@ function another() {
         });
     }
 
-// Asks the user about the employee they are adding and composes it into HTML format
-function addEmployee() {
-    inquirer.prompt([
-        {
-          type: 'input',
-          name: 'name',
-          message: 'Adding an employee, what is their name?',
-        },  
-        {
-          type: 'input',
-          name: 'id',
-          message: 'What is their ID?',
-        },  
-        {
-          type: 'input',
-          name: 'email',
-          message: 'What is their email?',
-        },  
-        {
-          type: 'list',
-          name: 'role',
-          message: 'What is their role?',
-          choices: ['manager', 'engineer', 'intern']
-        },  
-      ])
-      .then( (response) => {
-        if (response.role == 'manager'){
-            let name = response.name;
-            let id = response.id;
-            let email = response.email;
-            let role = response.role;
-            inquirer.prompt([
-                {
-                  type: 'input',
-                  name: 'office',
-                  message: 'What is their office number?',
-                },  
-              ])
-              .then((response) => {
-                const x = new manager(name, id, email, response.office, role);
-                const y = 
-                `<div class="card" style="width: 30%;">
-                <div class="card-body ${x.role}">
-                  <h5 class="card-title">${x.name}</h5>
-                  <p class="card-text"> Company ID: ${x.id}</p>
-                  <p class="card-text"> Email: <a href="mailto:${x.email}" target="_blank"><p class="bold">${x.email}</p> </a></p>
-                  <p class="card-text"> Role: ${x.role}</p>
-                  <p class="card-text"> Office: ${x.office}</p>
-                </div>
-              </div>`;
-                addInfo(y)
-              })
-        }
-        else if (response.role == 'engineer'){
-            let name = response.name;
-            let id = response.id;
-            let email = response.email;
-            let role = response.role;
-            inquirer.prompt([
-                {
-                  type: 'input',
-                  name: 'github',
-                  message: 'What is their github name?',
-                },  
-              ])
-              .then((response) => {
-                const x = new engineer(name, id, email, response.github, role);
-                const y = 
-                `<div class="card" style="width: 30%;">
-                <div class="card-body ${x.role}">
-                  <h5 class="card-title">${name}</h5>
-                  <p class="card-text"> Company ID: ${x.id}</p>
-                  <p class="card-text"> Email: <a href="mailto:${x.email}" target="_blank"><p class="bold">${x.email}</p> </a></p>
-                  <p class="card-text">Role: ${x.role}</p>
-                  <p class="card-text">GitHub: <a href="https://github.com/${x.github}" target="_blank"><p class="bold">github.com/${x.github}</p> </a></p>
-                </div>
-              </div>`;
-                addInfo(y);
-              })
-        }
-        else {
-            let name = response.name;
-            let id = response.id;
-            let email = response.email;
-            let role = response.role;
-            inquirer.prompt([
-                {
-                  type: 'input',
-                  name: 'school',
-                  message: 'What is their school?',
-                },  
-              ])
-              .then((response) => {
-                const x = new intern(name, id, email, response.school, role);
-                const y = 
-                `<div class="card" style="width: 30%;">
-                <div class="card-body ${x.role}">
-                  <h5 class="card-title">${name}</h5>
-                  <p class="card-text"> Company ID: ${x.id}</p>
-                  <p class="card-text"> Email: <a href="mailto:${x.email}" target="_blank"><p class="bold">${x.email}</p> </a></p>
-                  <p class="card-text">Role: ${x.role}</p>
-                  <p class="card-text"> School: ${x.school}</p>
-                </div>
-              </div>`;
-                addInfo(y);
-              })
-        }
-})}
 
 // Add the info generated with user input and adds it to the file
 function addInfo(x){
     fs.appendFile(`./${fileName}/index.html`, x,
-        function(err) {
+    function(err) {
             if (err){
                 console.log(err)
             }
