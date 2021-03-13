@@ -14,6 +14,9 @@
 ### description
 This App takes in employee information and generates an HTML document that publishes employee info.
 
+Video Demo of the app:
+https://drive.google.com/file/d/1xFKMvmsMOGoeGeQD9VQhKRTvKcnW1mVF/view 
+
 ### How to install
 Download the app from Git, install dependecies (inquirer), and run the index file in the terminal. 
 
